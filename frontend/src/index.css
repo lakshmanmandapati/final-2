@@ -70,6 +70,23 @@
   .feature-card {
     @apply bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20 hover:shadow-xl hover:bg-white/90 transition-all duration-300;
   }
+  
+  /* Custom slider styles */
+  .slider::-webkit-slider-thumb {
+    @apply appearance-none w-6 h-6 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full cursor-pointer shadow-lg;
+  }
+  
+  .slider::-moz-range-thumb {
+    @apply w-6 h-6 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full cursor-pointer shadow-lg border-0;
+  }
+  
+  .slider::-webkit-slider-track {
+    @apply bg-gray-200 rounded-lg h-3;
+  }
+  
+  .slider::-moz-range-track {
+    @apply bg-gray-200 rounded-lg h-3;
+  }
 }
 
 /* Custom animations */

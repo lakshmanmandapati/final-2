@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-// 1. Outlet is imported from react-router-dom
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { 
@@ -10,14 +9,13 @@ import {
   Clock, 
   Mic, 
   BarChart3, 
-  // 2. Unused 'Settings' icon is removed
   LogOut,
   User,
   Crown,
-  ChevronDown
+  ChevronDown,
+  GraduationCap
 } from 'lucide-react';
 
-// 3. The component no longer needs to accept a 'children' prop
 const Layout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -44,7 +42,7 @@ const Layout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -54,19 +52,19 @@ const Layout: React.FC = () => {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-white/90 backdrop-blur-md shadow-2xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+      <div className={`fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-white/95 backdrop-blur-xl shadow-2xl border-r border-white/20 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 flex-shrink-0">
+        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200/50 flex-shrink-0">
           <Link to="/dashboard" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+              <GraduationCap className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-bold gradient-text">StudySphere</span>
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">StudySphere</span>
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
             <X className="w-5 h-5 text-gray-600" />
           </button>
@@ -79,7 +77,11 @@ const Layout: React.FC = () => {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`nav-link ${isActive(item.href) ? 'active' : ''}`}
+                className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 font-medium ${
+                  isActive(item.href) 
+                    ? 'text-blue-600 bg-blue-50 font-semibold shadow-sm' 
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50/50'
+                }`}
                 onClick={() => setSidebarOpen(false)}
               >
                 <Icon className="w-5 h-5 mr-3" />
@@ -89,14 +91,14 @@ const Layout: React.FC = () => {
           })}
         </nav>
 
-        <div className="p-4 border-t border-gray-200 flex-shrink-0">
+        <div className="p-4 border-t border-gray-200/50 flex-shrink-0">
           <div className="relative">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-50/80 transition-all duration-200"
             >
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center shadow-md">
                   <User className="w-4 h-4 text-white" />
                 </div>
                 <div className="text-left">
@@ -112,10 +114,10 @@ const Layout: React.FC = () => {
             </button>
 
             {userMenuOpen && (
-              <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-xl shadow-lg border border-gray-200 p-2">
+              <div className="absolute bottom-full left-0 right-0 mb-2 bg-white/95 backdrop-blur-xl rounded-xl shadow-xl border border-gray-200/50 p-2">
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+                  className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign out
@@ -127,11 +129,11 @@ const Layout: React.FC = () => {
       </div>
 
       <div className="lg:pl-64">
-        <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-200">
+        <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
           <div className="flex items-center justify-between h-16 px-6">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
             >
               <Menu className="w-5 h-5 text-gray-600" />
             </button>
@@ -147,8 +149,7 @@ const Layout: React.FC = () => {
           </div>
         </div>
 
-        <main className="p-6">
-          {/* 4. Outlet is rendered here, allowing nested routes to appear */}
+        <main className="p-4 md:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>
