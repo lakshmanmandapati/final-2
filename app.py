@@ -1,0 +1,93 @@
+import os
+from flask import Flask, send_from_directory, jsonify
+from flask_jwt_extended import JWTManager
+from flask_socketio import SocketIO
+from flask_cors import CORS
+from dotenv import load_dotenv
+from database import db
+
+# Load environment variables
+load_dotenv()
+
+app = Flask(__name__, static_folder='static', static_url_path='')
+
+# Configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///studysphere.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'default-secret-key')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-flask-secret')
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False  # For development
+
+# Initialize extensions
+db.init_app(app)
+jwt = JWTManager(app)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+# JWT error handlers
+@jwt.expired_token_loader
+def expired_token_callback(jwt_header, jwt_payload):
+    return jsonify({'error': 'Token has expired'}), 401
+
+@jwt.invalid_token_loader
+def invalid_token_callback(error):
+    return jsonify({'error': 'Invalid token'}), 422
+
+@jwt.unauthorized_loader
+def missing_token_callback(error):
+    return jsonify({'error': 'Authorization token is required'}), 401
+
+# Import models after db initialization
+from models import User, Subject, StudySession, AudioNote
+
+# Import and register blueprints
+from auth import auth_bp
+from subjects import subjects_bp
+from sessions import sessions_bp
+from audio import audio_bp
+from ai import ai_bp
+from admin import admin_bp
+
+app.register_blueprint(auth_bp, url_prefix='/api/auth')
+app.register_blueprint(subjects_bp, url_prefix='/api/subjects')
+app.register_blueprint(sessions_bp, url_prefix='/api/sessions')
+app.register_blueprint(audio_bp, url_prefix='/api/audio')
+app.register_blueprint(ai_bp, url_prefix='/api/ai')
+app.register_blueprint(admin_bp, url_prefix='/api/admin')
+
+# Serve React App
+@app.route('/')
+def serve_react_app():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/<path:path>')
+def serve_react_routes(path):
+    if path.startswith('api/'):
+        return jsonify({'error': 'API endpoint not found'}), 404
+    if path.startswith('static/'):
+        return send_from_directory(app.static_folder, path)
+    return send_from_directory(app.static_folder, 'index.html')
+
+# Error handlers
+@app.errorhandler(404)
+def not_found(error):
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return jsonify({'error': 'Internal server error'}), 500
+
+# Health check endpoint
+@app.route('/api/health')
+def health_check():
+    return jsonify({'status': 'healthy', 'message': 'StudySphere API is running'})
+
+# Create database tables within the application context
+with app.app_context():
+    db.create_all()
+
+if __name__ == "__main__":
+    port = int(os.environ.get('PORT', 5000))
+    socketio.run(app, host="0.0.0.0", port=port, debug=False)
+
